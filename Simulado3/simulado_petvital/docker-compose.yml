@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  proxy:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - rede_petvital_frontend
+      - rede_petvital_backend
+    depends_on:
+      - backend
+      - frontend
+
+  frontend: 
+    build: .
+    networks:
+      - rede_petvital_frontend
+
+  backend: 
+    image: nginxdemos/hello
+    networks:
+      - rede_petvital_backend
+  
+  database:
+    image: postgres:13-alpine
+    env_file: 
+      - .env
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    volumes:
+      - database_petvital:/var/lib/postgresql/data
+    networks:
+      - rede_petvital_backend
+
+volumes:
+  database_petvital:
+
+networks:
+  rede_petvital_frontend:
+    driver: bridge
+  rede_petvital_backend:
+    driver: bridge
